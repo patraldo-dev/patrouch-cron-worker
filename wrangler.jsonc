@@ -1,0 +1,13 @@
+{
+  "name": "patrouch-cron-worker",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-13",
+  "triggers": {
+    "crons": [
+      "0 15 * * 1",
+      "0 2,8,14,20 * * *",
+      "0 */6 * * *",
+      "0 3 * * *"
+    ]
+  }
+}
