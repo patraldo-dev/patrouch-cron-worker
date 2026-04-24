@@ -9,16 +9,18 @@ export default {
 
     switch (event.cron) {
       case '0 15 * * 1':
-        // Sundays 333PM CST — Sappho writes
+        // Sundays 3PM CST — Sappho writes + weekly email
         await runTask('sappho', '/api/sappho/write', 'POST', AUTH);
+        await runTask('weekly-email', '/api/newsletter/send-weekly', 'POST', AUTH);
         break;
       case '0 2,8,14,20 * * *':
         // 4x daily — Narrator events
         await runTask('narrator', '/api/narrator', 'POST', AUTH);
         break;
       case '0 */6 * * *':
-        // Every 6 hours — Booty Bots AI decisions
+        // Every 6 hours — Booty Bots AI + Drift simulation
         await runTask('bot-ai', '/api/bottlequest/bot-ai-cron', 'POST', AUTH);
+        await runTask('drift', 'https://bottlequest.patrouch.ca/api/drift/simulate', 'POST', null, 'bottlequest');
         break;
       case '0 3 * * *':
         // Daily 3AM UTC — Search index rebuild
@@ -42,6 +44,7 @@ export default {
 
     const tasks = {
       'sappho': '/api/sappho/write',
+      'weekly-email': '/api/newsletter/send-weekly',
       'narrator': '/api/narrator',
       'bot-ai': '/api/bottlequest/bot-ai-cron',
       'search-reindex': '/api/search/index'
@@ -57,11 +60,12 @@ export default {
   }
 };
 
-async function runTask(name, path, method, auth) {
+async function runTask(name, path, method, auth, customBase) {
   const start = Date.now();
   console.log(`[CRON] Starting: ${name}`);
   try {
-    const resp = await fetch(`${BASE}${path}`, {
+    const url = path.startsWith('http') ? path : `${customBase || BASE}${path}`;
+    const resp = await fetch(url, {
       method,
       headers: {
         'Content-Type': 'application/json',
@@ -69,7 +73,12 @@ async function runTask(name, path, method, auth) {
       }
     });
     console.log(`[CRON] ${name}: ${resp.status} (${Date.now() - start}ms)`);
-    return { task: name, status: resp.status, ok: resp.ok, ms: Date.now() - start };
+    let detail = null;
+    try {
+      const body = await resp.text();
+      try { detail = JSON.parse(body); } catch { detail = body.slice(0, 300); }
+    } catch {}
+    return { task: name, status: resp.status, ok: resp.ok, ms: Date.now() - start, detail };
   } catch (e) {
     console.error(`[CRON] ${name} FAILED: ${e.message}`);
     return { task: name, error: e.message, ok: false, ms: Date.now() - start };
