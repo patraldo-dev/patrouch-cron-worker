@@ -20,7 +20,7 @@ export default {
       case '0 */6 * * *':
         // Every 6 hours — Booty Bots AI + Drift simulation
         await runTask('bot-ai', '/api/bottlequest/bot-ai-cron', 'POST', AUTH);
-        await runTask('drift', 'https://bottlequest.patrouch.ca/api/drift/simulate', 'POST', null, 'bottlequest');
+        await runTask('drift', '/api/bottlequest/drift/simulate', 'POST', AUTH);
         break;
       case '0 3 * * *':
         // Daily 3AM UTC — Search index rebuild
@@ -47,7 +47,8 @@ export default {
       'weekly-email': '/api/newsletter/send-weekly',
       'narrator': '/api/narrator',
       'bot-ai': '/api/bottlequest/bot-ai-cron',
-      'search-reindex': '/api/search/index'
+      'search-reindex': '/api/search/index',
+      'drift': '/api/bottlequest/drift/simulate'
     };
 
     const path = tasks[task];
