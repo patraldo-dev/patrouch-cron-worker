@@ -9,6 +9,12 @@
       "database_id": "0c520f9b-425c-4d29-b2a9-4dbd2ba1def6"
     }
   ],
+  "kv_namespaces": [
+    {
+      "binding": "CRON_LOGS",
+      "id": "6a3c9cd032784f3392dad4fd5779f735"
+    }
+  ],
   "triggers": {
     "crons": [
       "0 15 * * 1",
