@@ -6,7 +6,8 @@ const LOG_TTL = 86400 * 7; // 7 days
 
 export default {
   async scheduled(event, env, ctx) {
-    const AUTH = env.CRON_SECRET ? `Bearer ${env.CRON_SECRET}` : null;
+    const CRON_SECRET = await env.CRON_SECRET?.get?.() ?? null;
+    const AUTH = CRON_SECRET ? `Bearer ${CRON_SECRET}` : null;
 
     switch (event.cron) {
       case '0 15 * * 1':
@@ -39,7 +40,7 @@ export default {
     // Status endpoint
     if (url.pathname === '/status') {
       const secret = url.searchParams.get('secret');
-      const statusSecret = env.STATUS_SECRET || env.CRON_SECRET;
+      const statusSecret = (await env.STATUS_SECRET?.get?.()) || CRON_SECRET;
       if (!statusSecret || secret !== statusSecret) {
         return new Response('Forbidden', { status: 403 });
       }
@@ -48,9 +49,9 @@ export default {
 
     const task = url.searchParams.get('task');
     const secret = url.searchParams.get('secret');
-    const AUTH = env.CRON_SECRET ? `Bearer ${env.CRON_SECRET}` : null;
+    const AUTH = CRON_SECRET ? `Bearer ${CRON_SECRET}` : null;
 
-    if (!task || !env.CRON_SECRET || secret !== env.CRON_SECRET) {
+    if (!task || !CRON_SECRET || secret !== CRON_SECRET) {
       return new Response('Forbidden', { status: 403 });
     }
 
