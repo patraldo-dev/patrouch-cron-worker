@@ -40,7 +40,7 @@ export default {
     // Status endpoint
     if (url.pathname === '/status') {
       const secret = url.searchParams.get('secret');
-      const statusSecret = (await env.STATUS_SECRET?.get?.()) || CRON_SECRET;
+      const statusSecret = env.STATUS_SECRET || CRON_SECRET;
       if (!statusSecret || secret !== statusSecret) {
         return new Response('Forbidden', { status: 403 });
       }
